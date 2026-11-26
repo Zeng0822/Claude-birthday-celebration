@@ -89,7 +89,7 @@ section{padding-block:56px}
   background:radial-gradient(circle at 36% 32%,#fffbe9 0%,var(--moon) 38%,var(--moon-shade) 78%,#cdb67e 100%);
   box-shadow:0 0 60px 10px rgba(245,233,196,.22),0 0 160px 40px rgba(245,233,196,.10)}
 .crater{position:absolute;background:rgba(160,130,70,.18)}
-.clawd-wrap{position:absolute;left:50%;bottom:14%;width:62%;transform:translateX(-50%);cursor:pointer;border:0;background:none;padding:0}
+.clawd-wrap{position:absolute;left:50%;bottom:24%;width:60%;transform:translateX(-50%);cursor:pointer;border:0;background:none;padding:0}
 .clawd-wrap:focus-visible{outline-offset:8px}
 .sprite{display:block;width:100%;height:auto;overflow:visible}
 .px-body{fill:var(--body)}
@@ -474,45 +474,26 @@ function pixelSVG(map, pal = PAL) {
   return `<svg class="sprite px" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" aria-hidden="true">${out}</svg>`;
 }
 
-/* Clawd：O 身体 A/B 胳膊 E 眼睛上半(会眨) e 眼睛下半 p 腮红 g/G 金项圈和长命锁 w 头上的红结 L/M 小腿 */
-const CLAWD = [
-  "..........w.w...",
-  "...........w....",
-  "..OOOOOOOOOOOO..",
-  "..OOOOOOOOOOOO..",
-  "..OOEOOOOOOEOO..",
-  "..OOeOOOOOOeOO..",
-  "AAOpOOOOOOOOpOBB",
-  "AAOOgOOOOOOgOOBB",
-  "..OOOgOOOOgOOO..",
-  "..OOOOggggOOOO..",
-  "...L.M.gg.L.M...",
-  "...L.M.GG.L.M..."
-];
-function clawdSVG({ bow = true, bib = true, blush = true } = {}) {
-  const groups = { body:"", armL:"", armR:"", eyeTop:"", eye:"", deco:"" };
-  for (let y = 0; y < CLAWD.length; y++) for (let x = 0; x < 16; x++) {
-    let ch = CLAWD[y][x];
-    if (ch === "w" && !bow) continue;
-    if ((ch === "g" || ch === "G") && !bib) { if (y >= 10) continue; ch = "O"; }
-    if (ch === "p" && !blush) ch = "O";
-    const r = (cls, fill) => `<rect x="${x}" y="${y}" width="1.04" height="1.04"${cls ? ` class="${cls}"` : ""}${fill ? ` fill="${fill}"` : ""}/>`;
-    switch (ch) {
-      case "O": case "L": case "M": groups.body += r("px-body"); break;
-      case "A": groups.armL += r("px-body"); break;
-      case "B": groups.armR += r("px-body"); break;
-      case "E": groups.eyeTop += r("px-eye eye-top"); break;
-      case "e": groups.eye += r("px-eye"); break;
-      case "p": groups.body += r("px-body"); groups.deco += r("", "#f29b93").replace("/>", ' opacity=".75"/>'); break;
-      case "r": groups.deco += r("", PAL.r); break;
-      case "g": groups.deco += r("", PAL.g); break;
-      case "G": groups.deco += r("", PAL.G); break;
-      case "w": groups.deco += r("", PAL.r); break;
-    }
-  }
-  return `<svg class="sprite px" viewBox="0 0 16 12" shape-rendering="crispEdges" aria-hidden="true">
-    <g>${groups.body}</g><g class="arm arm-l">${groups.armL}</g><g class="arm arm-r">${groups.armR}</g>
-    <g>${groups.eye}</g><g>${groups.eyeTop}</g><g>${groups.deco}</g></svg>`;
+/* Clawd：按终端里的原版造型画——宽身体、两只小方眼、两侧小胳膊、四条短腿。
+   终端半格字符的像素是“瘦高”的，所以每行画 2 个单位高。头顶的小红结是满月装扮。 */
+function clawdSVG({ bow = true } = {}) {
+  const R = (x, y, w, h, cls, fill) => `<rect x="${x}" y="${y}" width="${w + .04}" height="${h + .04}"${cls ? ` class="${cls}"` : ""}${fill ? ` fill="${fill}"` : ""}/>`;
+  const top = 4;                       // 身体从 y=4 开始，上面留给红结
+  const body = [
+    R(3, top, 12, 2, "px-body"),       // 头顶
+    R(3, top + 2, 2, 2, "px-body"),    // 眼睛那一行（左眼在 x=5，右眼在 x=12）
+    R(6, top + 2, 6, 2, "px-body"),
+    R(13, top + 2, 2, 2, "px-body"),
+    R(3, top + 4, 12, 2, "px-body"),   // 胳膊那一行的身体
+    R(3, top + 6, 12, 2, "px-body"),   // 下半身
+    R(4, top + 8, 1, 2, "px-body"), R(6, top + 8, 1, 2, "px-body"),   // 四条腿
+    R(11, top + 8, 1, 2, "px-body"), R(13, top + 8, 1, 2, "px-body")
+  ].join("");
+  const eyes = R(5, top + 2, 1, 2, "px-eye eye-top") + R(12, top + 2, 1, 2, "px-eye eye-top");
+  const armL = R(1, top + 4, 2, 2, "px-body"), armR = R(15, top + 4, 2, 2, "px-body");
+  const deco = bow ? [R(10, 1, 1, 1, "", PAL.r), R(12, 1, 1, 1, "", PAL.r), R(10, 2, 3, 1, "", PAL.r), R(11, 3, 1, 1, "", PAL.R), R(11, 2, 1, 1, "", PAL.g)].join("") : "";
+  return `<svg class="sprite px" viewBox="0 ${bow ? 0 : top - 1} 18 ${bow ? top + 10 : 11}" shape-rendering="crispEdges" aria-hidden="true">
+    <g>${body}</g><g class="arm arm-l">${armL}</g><g class="arm arm-r">${armR}</g><g>${eyes}</g><g>${deco}</g></svg>`;
 }
 
 const SPRITES = {
@@ -536,8 +517,7 @@ GIFTS.forEach(g => SPRITES["gift-" + g.id] = g.map);
 function spriteHTML(name) {
   if (name === "clawd") return clawdSVG();
   if (name === "clawd-plain") return clawdSVG({ bow:false });
-  if (name === "clawd-guest") return clawdSVG({ bow:false, bib:false });
-  return SPRITES[name] ? pixelSVG(SPRITES[name]) : "";
+    return SPRITES[name] ? pixelSVG(SPRITES[name]) : "";
 }
 $$("[data-sprite]").forEach(el => el.innerHTML = spriteHTML(el.dataset.sprite));
 
@@ -734,7 +714,7 @@ function renderPeers(peers) {
   list.slice(0, 30).forEach(p => {
     const d = document.createElement("div");
     d.className = "peer" + (p.isMe ? " me" : "");
-    d.innerHTML = clawdSVG({ bow:false, bib:false });
+    d.innerHTML = clawdSVG({ bow:false });
     const pr = p.presence || {};
     const col = typeof pr.c === "string" && /^(#[0-9a-fA-F]{3,8}|rgba?\([\d\s.,%]+\)|hsla?\([\d\s.,%deg]+\))$/.test(pr.c) ? pr.c : null;
     if (col) d.firstElementChild.style.setProperty("--body", col);
