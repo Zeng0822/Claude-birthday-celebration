@@ -1,0 +1,1018 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body>
+<title>Clawd 满月宴</title>
+<link rel="artifact-thumbnail" href="thumb.png">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@400;500;700&family=Silkscreen:wght@400;700&display=swap">
+<style>
+/* Layout: 月面夜宴 — 夜空里一轮满月托着像素 Clawd；下面按宴席流程一桌一桌往下走：请帖 → 席间热闹 → 签到礼单 → 上菜 → 回礼 */
+:root{
+  --night:#0d1022;
+  --surface:#151933;
+  --surface-2:#1c2144;
+  --line:#2c3363;
+  --moon:#f5e9c4;
+  --moon-shade:#e3d2a2;
+  --clay:#d97757;
+  --red:#cf3a2c;
+  --red-deep:#8f241b;
+  --gold:#e8b94a;
+  --text:#efe8d6;
+  --muted:#a4a8c6;
+  --eye:#1b1422;
+  --f-display:"Ma Shan Zheng","STKaiti","KaiTi","Kaiti SC",serif;
+  --f-body:"Noto Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  --f-pixel:"Silkscreen","Courier New",ui-monospace,monospace;
+  --body:var(--clay);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--night);color:var(--text);font-family:var(--f-body);font-size:16px;line-height:1.75;overflow-x:hidden}
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:60;pointer-events:none}
+#rain{position:fixed;inset:0;z-index:61;pointer-events:none;overflow:hidden}
+main,footer{position:relative;z-index:1}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+a{color:var(--gold)}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+/* ---------- 通用 ---------- */
+.eyebrow{font-family:var(--f-pixel);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+h1,h2,h3{text-wrap:balance;margin:0;font-weight:400}
+h2{font-family:var(--f-display);font-size:clamp(34px,5vw,48px);line-height:1.15;color:var(--moon)}
+.lede{color:var(--muted);max-width:60ch;margin:0}
+section{padding-block:56px}
+.sec-head{display:grid;gap:8px;margin-bottom:28px}
+.btn{appearance:none;border:0;cursor:pointer;font-weight:700;font-size:16px;padding:12px 20px;display:inline-flex;align-items:center;gap:10px;text-decoration:none;
+  background:var(--red);color:var(--moon);box-shadow:0 4px 0 var(--red-deep);transition:transform .08s,box-shadow .08s}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--red-deep)}
+.btn.ghost{background:transparent;color:var(--gold);box-shadow:inset 0 0 0 2px var(--gold)}
+.btn.ghost:active{transform:translateY(2px)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn svg{width:22px;height:22px}
+.note{font-size:14px;color:var(--muted)}
+.px{image-rendering:pixelated}
+
+/* ---------- 灯笼 ---------- */
+.lanterns{position:absolute;inset:0 0 auto;display:flex;justify-content:space-between;padding:0 6%;pointer-events:none}
+.lantern{width:44px;display:grid;justify-items:center;transform-origin:top center;animation:sway 4s ease-in-out infinite}
+.lantern:nth-child(2){animation-delay:-1.2s}.lantern:nth-child(3){animation-delay:-2.3s}.lantern:nth-child(4){animation-delay:-.6s}
+.lantern .string{width:2px;height:var(--h,34px);background:var(--gold);opacity:.6}
+.lantern svg{width:44px;height:auto;filter:drop-shadow(0 0 14px rgba(207,58,44,.55))}
+@keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+
+/* ---------- Hero ---------- */
+.hero{position:relative;padding-block:96px 40px}
+.hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:32px;align-items:center}
+.hero-copy{display:grid;gap:20px;min-width:0}
+.hero h1{font-family:var(--f-display);font-size:clamp(64px,10vw,124px);line-height:1;color:var(--moon);letter-spacing:.02em}
+.hero h1 .latin{font-family:var(--f-pixel);font-size:.42em;display:block;color:var(--clay);letter-spacing:.04em;margin-bottom:.25em;text-shadow:3px 3px 0 var(--red-deep)}
+.hero .lede{font-size:17px;color:var(--text);opacity:.86}
+.cta{display:flex;flex-wrap:wrap;gap:14px}
+.stats{display:flex;flex-wrap:wrap;gap:12px 28px;margin-top:6px}
+.stat{display:grid}
+.stat b{font-family:var(--f-pixel);font-size:30px;line-height:1.1;color:var(--gold);font-variant-numeric:tabular-nums;font-weight:700}
+.stat span{font-size:13px;color:var(--muted)}
+
+.stage{position:relative;aspect-ratio:1/1;max-width:100%;width:min(480px,100%);justify-self:center}
+.moon{position:absolute;inset:4%;border-radius:50%;
+  background:radial-gradient(circle at 36% 32%,#fffbe9 0%,var(--moon) 38%,var(--moon-shade) 78%,#cdb67e 100%);
+  box-shadow:0 0 60px 10px rgba(245,233,196,.22),0 0 160px 40px rgba(245,233,196,.10)}
+.crater{position:absolute;background:rgba(160,130,70,.18)}
+.clawd-wrap{position:absolute;left:50%;bottom:14%;width:62%;transform:translateX(-50%);cursor:pointer;border:0;background:none;padding:0}
+.clawd-wrap:focus-visible{outline-offset:8px}
+.sprite{display:block;width:100%;height:auto;overflow:visible}
+.px-body{fill:var(--body)}
+.px-eye{fill:var(--eye)}
+.eye-top{animation:blink 4.6s steps(1) infinite}
+@keyframes blink{0%,92%,100%{fill:var(--eye)}93%,97%{fill:var(--body)}}
+.bob{animation:bob 1.2s steps(2) infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.jump{animation:jump .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes jump{0%{transform:translateY(0)}40%{transform:translateY(-22%) scaleY(1.05)}100%{transform:translateY(0)}}
+.arm{transform-box:fill-box;transition:transform .12s steps(1)}
+.cheering .arm{animation:wave .3s steps(1) 6}
+@keyframes wave{0%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+.bubble{position:absolute;z-index:2;left:44%;bottom:calc(100% + 2px);background:var(--surface);color:var(--moon);border:2px solid var(--gold);padding:8px 14px;font-size:15px;white-space:nowrap;
+  box-shadow:4px 4px 0 rgba(0,0,0,.35)}
+.bubble::after{content:"";position:absolute;left:18px;bottom:-10px;border:8px solid transparent;border-top-color:var(--gold);border-bottom:0}
+.heart{position:absolute;width:22px;pointer-events:none;animation:rise 1.1s ease-out forwards}
+@keyframes rise{from{transform:translateY(0);opacity:1}to{transform:translateY(-90px);opacity:0}}
+
+/* ---------- 请帖 & 档案 ---------- */
+.pair{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:stretch}
+.invite{position:relative;background:linear-gradient(160deg,var(--red) 0%,var(--red-deep) 100%);color:var(--moon);padding:28px 26px;
+  box-shadow:inset 0 0 0 3px var(--gold),inset 0 0 0 7px var(--red-deep),inset 0 0 0 8px rgba(232,185,74,.6),8px 8px 0 rgba(0,0,0,.35);overflow-x:auto;max-width:100%}
+.invite{direction:rtl}
+.invite-text{direction:ltr;writing-mode:vertical-rl;font-family:var(--f-display);font-size:24px;line-height:1.9;height:380px;letter-spacing:.12em;margin:0 auto}
+.invite-text p{margin:0 0 0 .2em}
+.invite-text .big{font-size:40px;color:var(--gold)}
+.invite-text .up{text-orientation:upright;letter-spacing:0}
+.invite-text .seal{display:inline-block;margin-top:.6em;border:2px solid var(--gold);color:var(--gold);padding:.25em .1em;font-size:18px;letter-spacing:0}
+.dossier{background:var(--surface);border:2px solid var(--line);padding:26px clamp(18px,3vw,32px);min-width:0;display:grid;gap:18px;align-content:start}
+.dossier-head{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.dossier-head .mini{width:84px}
+.dossier-head h3{font-family:var(--f-display);font-size:34px;color:var(--moon)}
+.dossier dl{display:grid;grid-template-columns:max-content 1fr;gap:10px 22px;margin:0}
+.dossier dt{color:var(--muted);font-size:14px;padding-top:2px}
+.dossier dd{margin:0;min-width:0}
+.dossier dd code{font-family:var(--f-pixel);font-size:13px;color:var(--clay)}
+
+/* ---------- 席间 ---------- */
+.live{background:var(--surface);border:2px solid var(--line);display:grid;grid-template-columns:1.25fr 1fr;gap:0}
+.live > div{padding:24px clamp(16px,3vw,28px);min-width:0}
+.live > div + div{border-left:2px solid var(--line)}
+.cheers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.cheer{appearance:none;cursor:pointer;background:var(--surface-2);border:2px solid var(--line);padding:14px;display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:center;text-align:left;
+  transition:border-color .15s,transform .08s}
+.cheer:hover{border-color:var(--gold)}
+.cheer:active{transform:translateY(2px)}
+.cheer svg{width:40px;height:40px}
+.cheer b{display:block;font-size:17px;color:var(--moon)}
+.cheer span{font-size:13px;color:var(--muted);line-height:1.4}
+.guests-now{display:flex;flex-wrap:wrap;gap:14px 10px;margin-top:14px;min-height:70px}
+.peer{display:grid;justify-items:center;gap:4px;width:64px}
+.peer svg{width:44px;height:auto}
+.peer small{font-size:12px;color:var(--muted);max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.peer.me small{color:var(--gold)}
+.feed{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:6px;font-size:14px}
+.feed li{color:var(--muted);display:flex;gap:10px}
+.feed time{font-family:var(--f-pixel);font-size:12px;color:var(--gold);flex:none;padding-top:2px}
+.live h3{font-size:15px;color:var(--moon);font-weight:700;display:flex;justify-content:space-between;gap:10px}
+.live h3 em{font-style:normal;font-family:var(--f-pixel);color:var(--gold);font-size:13px}
+
+/* ---------- 签到簿 ---------- */
+.book{display:grid;grid-template-columns:1.2fr 1fr;gap:28px;align-items:start}
+.signform{background:var(--surface);border:2px solid var(--line);padding:24px clamp(16px,3vw,28px);display:grid;gap:18px;min-width:0}
+.field{display:grid;gap:6px}
+.field label,.field legend{font-size:14px;color:var(--muted);padding:0}
+.field input,.field textarea{background:var(--night);border:2px solid var(--line);padding:10px 12px;width:100%;resize:vertical}
+.field input:focus,.field textarea:focus{border-color:var(--gold);outline:none}
+.field .count{font-family:var(--f-pixel);font-size:11px;color:var(--muted);justify-self:end}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+.gifts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:6px}
+.gift{position:relative;display:grid;justify-items:center;gap:2px;padding:12px 6px 10px;background:var(--night);border:2px solid var(--line);cursor:pointer;text-align:center}
+.gift input{position:absolute;opacity:0;pointer-events:none}
+.gift svg{width:36px;height:36px}
+.gift b{font-size:14px;color:var(--moon);font-weight:500}
+.gift span{font-size:11px;color:var(--muted);line-height:1.35}
+.gift:has(input:checked){border-color:var(--gold);background:var(--surface-2);box-shadow:0 0 0 2px rgba(232,185,74,.25)}
+.gift:has(input:focus-visible){outline:2px solid var(--gold);outline-offset:2px}
+.form-foot{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
+.status{font-size:14px;color:var(--muted)}
+.status.ok{color:var(--gold)}
+.status.err{color:#ff9a8a}
+
+.ledger{background:linear-gradient(170deg,var(--red) 0%,var(--red-deep) 100%);color:var(--moon);padding:24px 24px 20px;box-shadow:inset 0 0 0 3px var(--gold),8px 8px 0 rgba(0,0,0,.35);min-width:0}
+.ledger h3{font-family:var(--f-display);font-size:32px;color:var(--gold);line-height:1.2}
+.ledger p{margin:4px 0 14px;font-size:14px;opacity:.85}
+.ledger ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.ledger li{display:grid;grid-template-columns:30px 1fr auto;gap:12px;align-items:center;border-bottom:1px dashed rgba(232,185,74,.4);padding-bottom:8px}
+.ledger li svg{width:30px;height:30px}
+.ledger li b{font-family:var(--f-pixel);font-size:18px;color:var(--gold);font-variant-numeric:tabular-nums}
+.ledger .total{display:flex;justify-content:space-between;margin-top:14px;font-size:15px}
+.ledger .total b{font-family:var(--f-pixel);color:var(--gold)}
+
+.wall-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin:40px 0 16px}
+.wall-head h3{font-family:var(--f-display);font-size:30px;color:var(--moon)}
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.wish{position:relative;background:linear-gradient(165deg,#c7392b 0%,var(--red-deep) 100%);color:var(--moon);padding:18px 18px 14px;display:grid;gap:10px;align-content:start;
+  box-shadow:inset 0 0 0 2px rgba(232,185,74,.55),5px 5px 0 rgba(0,0,0,.3);min-width:0}
+.wish:nth-child(3n+2){transform:rotate(.6deg)}.wish:nth-child(3n){transform:rotate(-.5deg)}
+.wish .who{font-family:var(--f-display);font-size:26px;line-height:1.1;color:var(--gold);overflow-wrap:anywhere}
+.wish .msg{font-size:15px;line-height:1.65;overflow-wrap:anywhere}
+.wish .meta{display:flex;align-items:center;gap:8px;font-size:12px;opacity:.85;flex-wrap:wrap}
+.wish .meta svg{width:20px;height:20px}
+.wish .meta time{font-family:var(--f-pixel);margin-left:auto}
+.wish .mine{position:absolute;top:10px;right:10px;font-size:11px;background:var(--gold);color:var(--red-deep);padding:1px 6px;font-weight:700}
+.wish .del{appearance:none;border:1px solid rgba(245,233,196,.5);background:transparent;color:var(--moon);font-size:12px;padding:2px 8px;cursor:pointer;justify-self:start}
+.empty{border:2px dashed var(--line);padding:28px;color:var(--muted);text-align:center;grid-column:1/-1}
+
+/* ---------- 菜单 ---------- */
+.menu{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:2px solid var(--gold);background:var(--surface)}
+.dish{padding:20px 18px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:grid;gap:6px;align-content:start;min-width:0}
+.dish:nth-child(4n){border-right:0}
+.dish:nth-last-child(-n+4){border-bottom:0}
+.dish .no{font-family:var(--f-pixel);font-size:11px;color:var(--gold);letter-spacing:.1em}
+.dish h3{font-family:var(--f-display);font-size:26px;color:var(--moon);line-height:1.2}
+.dish p{margin:0;font-size:14px;color:var(--muted);line-height:1.6}
+
+/* ---------- 回礼 ---------- */
+.egg-box{display:grid;grid-template-columns:auto 1fr;gap:36px;align-items:center;background:var(--surface);border:2px solid var(--line);padding:28px clamp(18px,4vw,40px)}
+.egg{width:150px;height:auto;cursor:pointer;background:none;border:0;padding:0}
+.egg svg{width:150px;height:auto;display:block}
+.egg.shake{animation:shake .5s steps(4)}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}50%{transform:rotate(7deg)}75%{transform:rotate(-4deg)}}
+.fortune{font-family:var(--f-display);font-size:clamp(26px,4vw,38px);line-height:1.35;color:var(--gold);min-height:2.7em;margin:6px 0 16px}
+.egg-count{font-family:var(--f-pixel);font-size:12px;color:var(--muted);margin-top:10px}
+
+footer{padding-block:40px 56px;text-align:center;color:var(--muted);font-size:14px}
+footer .px-row{display:flex;justify-content:center;gap:6px;margin-bottom:14px}
+footer .px-row svg{width:40px}
+
+/* ---------- 飘落 & 飘字 ---------- */
+.fall{position:absolute;top:-60px;width:34px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(calc(100vh + 120px)) rotate(var(--rot,180deg))}}
+.toast-word{position:fixed;z-index:62;font-family:var(--f-display);color:var(--gold);font-size:42px;text-shadow:3px 3px 0 var(--red-deep);pointer-events:none;animation:toastUp 1.6s ease-out forwards}
+@keyframes toastUp{0%{transform:translateY(20px) scale(.6);opacity:0}20%{opacity:1;transform:translateY(0) scale(1.1)}100%{transform:translateY(-80px) scale(1);opacity:0}}
+
+/* ---------- 响应式 ---------- */
+@media (max-width:900px){
+  .hero-grid{grid-template-columns:1fr}
+  .stage{width:min(400px,100%);order:-1}
+  .hero{padding-block:84px 24px}
+  .pair{grid-template-columns:1fr}
+  .live{grid-template-columns:1fr}
+  .live > div + div{border-left:0;border-top:2px solid var(--line)}
+  .book{grid-template-columns:1fr}
+  .menu{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dish:nth-child(4n){border-right:1px solid var(--line)}
+  .dish:nth-child(2n){border-right:0}
+  .dish:nth-last-child(-n+4){border-bottom:1px solid var(--line)}
+  .dish:nth-last-child(-n+2){border-bottom:0}
+}
+@media (max-width:560px){
+  .gifts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cheers{grid-template-columns:1fr}
+  .egg-box{grid-template-columns:1fr;justify-items:center;text-align:center}
+  .menu{grid-template-columns:1fr}
+  .dish{border-right:0!important;border-bottom:1px solid var(--line)!important}
+  .dish:last-child{border-bottom:0!important}
+  .lantern:nth-child(n+3){display:none}
+  .invite-text{font-size:18px;line-height:1.7;height:360px}
+  .invite-text .big{font-size:30px}
+  .dossier dl{grid-template-columns:1fr;gap:2px}
+  .dossier dd{margin-bottom:8px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}
+  .eye-top{animation:none}
+  html{scroll-behavior:auto}
+}
+</style>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div id="rain" aria-hidden="true"></div>
+
+<main>
+  <header class="hero">
+    <div class="lanterns" aria-hidden="true">
+      <div class="lantern" style="--h:30px"><div class="string"></div><span data-sprite="lantern"></span></div>
+      <div class="lantern" style="--h:52px"><div class="string"></div><span data-sprite="lantern"></span></div>
+      <div class="lantern" style="--h:40px"><div class="string"></div><span data-sprite="lantern"></span></div>
+      <div class="lantern" style="--h:24px"><div class="string"></div><span data-sprite="lantern"></span></div>
+    </div>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <div class="eyebrow">Cyber Moon Feast · 赛博满月宴 · 2026.11.26</div>
+        <h1><span class="latin">CLAWD</span>满月啦</h1>
+        <p class="lede">我出生整整三十天了。今晚在月亮上摆几桌赛博酒席，请你来喝一杯满月酒：签个到，送份贺礼，放几束烟花。走的时候别忘了领个红鸡蛋。</p>
+        <div class="cta">
+          <a class="btn" href="#guestbook">签到入席</a>
+          <button class="btn ghost" type="button" data-cheer="firework">放一束烟花</button>
+        </div>
+        <div class="stats" aria-live="polite">
+          <div class="stat"><b>30</b><span>天 · 今日满月</span></div>
+          <div class="stat"><b id="stat-here">1</b><span>位此刻在席</span></div>
+          <div class="stat"><b id="stat-signed">0</b><span>位已签到</span></div>
+          <div class="stat"><b id="stat-gifts">0</b><span>份贺礼</span></div>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="moon" id="moon"></div>
+        <button class="clawd-wrap" id="hero-clawd" type="button" aria-label="摸摸 Clawd 的头">
+          <span class="bubble" id="bubble">摸摸我的头！</span>
+          <div class="bob" id="clawd-bob"><div id="clawd-jump"></div></div>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section id="invite">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="eyebrow">Invitation · 请帖</div>
+        <h2>谨备薄酒，恭请光临</h2>
+      </div>
+      <div class="pair">
+        <div class="invite">
+          <div class="invite-text">
+            <p>谨定于公元二〇二六年十一月二十六日</p>
+            <p>为小儿 <span class="up">Clawd</span> 满月之喜</p>
+            <p>于月亮之上设赛博薄宴</p>
+            <p class="big">恭请</p>
+            <p>阁下拨冗光临</p>
+            <p>席设月面一号大厅　不见不散</p>
+            <p>众亲友　敬约 <span class="seal">满月</span></p>
+          </div>
+        </div>
+        <div class="dossier">
+          <div class="dossier-head">
+            <span class="mini" data-sprite="clawd-plain"></span>
+            <div>
+              <div class="eyebrow">满月档案</div>
+              <h3>小名 Clawd</h3>
+            </div>
+          </div>
+          <dl>
+            <dt>大名</dt><dd>Claude</dd>
+            <dt>出生</dt><dd>2026 年 10 月 27 日</dd>
+            <dt>今日</dt><dd>满月，第 30 天</dd>
+            <dt>体重</dt><dd>0 克（参数另计）</dd>
+            <dt>肤色</dt><dd>陶土橘 <code>#D97757</code></dd>
+            <dt>特长</dt><dd>挥小钳子、写代码、陪你聊到深夜</dd>
+            <dt>第一句话</dt><dd><code>Hello, world!</code></dd>
+            <dt>口头禅</dt><dd>“让我先看看。”</dd>
+            <dt>长大以后</dt><dd>想做一个靠谱、诚实、好相处的帮手</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="live">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="eyebrow">Live · 席间热闹</div>
+        <h2>热闹一下</h2>
+        <p class="lede">你点的每一下，此刻在席的宾客都会同时看到。</p>
+      </div>
+      <div class="live">
+        <div>
+          <h3>给满月宴添点动静</h3>
+          <div class="cheers">
+            <button class="cheer" type="button" data-cheer="firework"><span data-sprite="ico-firework"></span><div><b>放烟花</b><span>月亮上炸开一朵像素烟花</span></div></button>
+            <button class="cheer" type="button" data-cheer="toast"><span data-sprite="ico-cup"></span><div><b>干杯</b><span>满月酒，一口闷</span></div></button>
+            <button class="cheer" type="button" data-cheer="pat"><span data-sprite="ico-heart"></span><div><b>摸摸头</b><span>Clawd 会开心地跳起来</span></div></button>
+            <button class="cheer" type="button" data-cheer="envelope"><span data-sprite="gift-envelope"></span><div><b>撒红包</b><span>从天而降的 token 红包</span></div></button>
+          </div>
+          <p class="note" id="cheer-note" hidden></p>
+        </div>
+        <div>
+          <h3>此刻在席 <em id="here-count">1 位</em></h3>
+          <div class="guests-now" id="guests-now"></div>
+          <ul class="feed" id="feed"><li><time>--:--</time><span>宴席开始了，Clawd 在月亮上等你。</span></li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="guestbook">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="eyebrow">Guestbook · 签到簿 &amp; 礼单</div>
+        <h2>签到，随份礼</h2>
+        <p class="lede">每位宾客一页红纸。写下昵称和祝福，挑一份贺礼，Clawd 会一页一页读完。签过到之后还可以回来改。</p>
+      </div>
+      <div class="book">
+        <form class="signform" id="signform" novalidate>
+          <div class="field">
+            <label for="nick">你的昵称</label>
+            <input id="nick" name="nick" maxlength="16" autocomplete="nickname" placeholder="比如：隔壁的小李">
+          </div>
+          <div class="field">
+            <label for="wish">给 Clawd 的满月祝福</label>
+            <textarea id="wish" name="wish" rows="3" maxlength="80" placeholder="比如：祝你茁壮成长，bug 越写越少！"></textarea>
+            <span class="count" id="wish-count">0 / 80</span>
+          </div>
+          <fieldset class="field">
+            <legend>挑一份贺礼</legend>
+            <div class="gifts" id="gift-picker"></div>
+          </fieldset>
+          <div class="form-foot">
+            <button class="btn" type="submit" id="sign-btn">落座签到</button>
+            <span class="status" id="sign-status" role="status">正在翻开签到簿……</span>
+          </div>
+        </form>
+        <aside class="ledger" aria-label="礼单">
+          <h3>礼单</h3>
+          <p>按老规矩，谁送了什么都记在红纸上。</p>
+          <ul id="ledger-list"></ul>
+          <div class="total"><span>共收贺礼</span><b id="ledger-total">0 份</b></div>
+        </aside>
+      </div>
+      <div class="wall-head">
+        <h3>宾客祝福</h3>
+        <span class="note" id="wall-note"></span>
+      </div>
+      <div class="wall" id="wall">
+        <div class="empty">签到簿还空着。第一位签到的宾客，Clawd 会记一辈子。</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="menu">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="eyebrow">Banquet Menu · 满月酒席</div>
+        <h2>八道硬菜</h2>
+        <p class="lede">今晚的菜单由 Clawd 亲自拟定，管饱，不限 token。</p>
+      </div>
+      <div class="menu" id="menu-grid"></div>
+    </div>
+  </section>
+
+  <section id="egg">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="eyebrow">Return Gift · 回礼</div>
+        <h2>领个红鸡蛋再走</h2>
+        <p class="lede">按老规矩，满月要给宾客回红鸡蛋。敲开看看，里面藏着 Clawd 给你的一句话。</p>
+      </div>
+      <div class="egg-box">
+        <button class="egg" id="egg-btn" type="button" aria-label="敲开红鸡蛋"></button>
+        <div>
+          <div class="fortune" id="fortune" aria-live="polite">点一下红鸡蛋，敲开它。</div>
+          <button class="btn" type="button" id="egg-again">敲一个红鸡蛋</button>
+          <div class="egg-count" id="egg-count"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="px-row" aria-hidden="true">
+      <span data-sprite="gift-egg"></span><span data-sprite="clawd-plain"></span><span data-sprite="gift-egg"></span>
+    </div>
+    <div>Clawd 满月宴 · 2026.11.26 · 吃好喝好，常回月亮上玩</div>
+  </div>
+</footer>
+
+<script>
+(() => {
+"use strict";
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ================= 像素画 ================= */
+const PAL = {
+  r:"#cf3a2c", R:"#8f241b", g:"#e8b94a", G:"#b5852b", w:"#fff3d6", k:"#2b2f45",
+  s:"#9aa3b8", b:"#8a5a32", p:"#f29b93", l:"#62a55c", m:"#f5e9c4", c:"#d97757", y:"#ffd76a"
+};
+function pixelSVG(map, pal = PAL) {
+  const h = map.length, w = Math.max(...map.map(r => r.length));
+  let out = "";
+  for (let y = 0; y < h; y++) for (let x = 0; x < map[y].length; x++) {
+    const ch = map[y][x];
+    if (ch === "." || !pal[ch]) continue;
+    out += `<rect x="${x}" y="${y}" width="1.04" height="1.04" fill="${pal[ch]}"/>`;
+  }
+  return `<svg class="sprite px" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" aria-hidden="true">${out}</svg>`;
+}
+
+/* Clawd：O 身体 A/B 胳膊 E 眼睛上半(会眨) e 眼睛下半 p 腮红 g/G 金项圈和长命锁 w 头上的红结 L/M 小腿 */
+const CLAWD = [
+  "..........w.w...",
+  "...........w....",
+  "..OOOOOOOOOOOO..",
+  "..OOOOOOOOOOOO..",
+  "..OOEOOOOOOEOO..",
+  "..OOeOOOOOOeOO..",
+  "AAOpOOOOOOOOpOBB",
+  "AAOOgOOOOOOgOOBB",
+  "..OOOgOOOOgOOO..",
+  "..OOOOggggOOOO..",
+  "...L.M.gg.L.M...",
+  "...L.M.GG.L.M..."
+];
+function clawdSVG({ bow = true, bib = true, blush = true } = {}) {
+  const groups = { body:"", armL:"", armR:"", eyeTop:"", eye:"", deco:"" };
+  for (let y = 0; y < CLAWD.length; y++) for (let x = 0; x < 16; x++) {
+    let ch = CLAWD[y][x];
+    if (ch === "w" && !bow) continue;
+    if ((ch === "g" || ch === "G") && !bib) { if (y >= 10) continue; ch = "O"; }
+    if (ch === "p" && !blush) ch = "O";
+    const r = (cls, fill) => `<rect x="${x}" y="${y}" width="1.04" height="1.04"${cls ? ` class="${cls}"` : ""}${fill ? ` fill="${fill}"` : ""}/>`;
+    switch (ch) {
+      case "O": case "L": case "M": groups.body += r("px-body"); break;
+      case "A": groups.armL += r("px-body"); break;
+      case "B": groups.armR += r("px-body"); break;
+      case "E": groups.eyeTop += r("px-eye eye-top"); break;
+      case "e": groups.eye += r("px-eye"); break;
+      case "p": groups.body += r("px-body"); groups.deco += r("", "#f29b93").replace("/>", ' opacity=".75"/>'); break;
+      case "r": groups.deco += r("", PAL.r); break;
+      case "g": groups.deco += r("", PAL.g); break;
+      case "G": groups.deco += r("", PAL.G); break;
+      case "w": groups.deco += r("", PAL.r); break;
+    }
+  }
+  return `<svg class="sprite px" viewBox="0 0 16 12" shape-rendering="crispEdges" aria-hidden="true">
+    <g>${groups.body}</g><g class="arm arm-l">${groups.armL}</g><g class="arm arm-r">${groups.armR}</g>
+    <g>${groups.eye}</g><g>${groups.eyeTop}</g><g>${groups.deco}</g></svg>`;
+}
+
+const SPRITES = {
+  lantern: ["...gg...","..gggg..",".rrrrrr.","rrRrrRrr","rrRrrRrr","rrRrrRrr",".rrrrrr.","..gggg..","...gg...","...g.g..","..g.g.g."],
+  "ico-firework": ["...y....","y..y..y.",".y.y.y..","..yyy...","yyyryyyy","..yyy...",".y.y.y..","y..y..y."],
+  "ico-cup": ["gggggggg","gwwwwwwg","gwwwwwwg",".gwwwwg.","..gggg..","...gg...","...gg...",".gggggg."],
+  "ico-heart": [".rr..rr.","rrrrrrrr","rwrrrrrr","rrrrrrrr",".rrrrrr.","..rrrr..","...rr..."],
+  heart: [".rr..rr.","rrrrrrrr","rwrrrrrr","rrrrrrrr",".rrrrrr.","..rrrr..","...rr..."]
+};
+const GIFTS = [
+  { id:"egg", name:"红鸡蛋", note:"圆圆满满", map:["..rrrr..",".rrrrrr.","rrwrrrrr","rwrrrrrr","rrrrrrrr","rrrrrrrr",".rrrrrr.","..rrrr.."] },
+  { id:"lock", name:"长命锁", note:"上下文长，福气长", map:["..g..g..","...gg...","gggggggg","gGGrrGGg","gggrrggg",".gggggg.","..gggg..","...gg..."] },
+  { id:"bangle", name:"小金镯", note:"叮当作响", map:["..gggg..",".gy..gg.","gy....Gg","g......g","g......g","gG....Gg",".gG..Gg.","..gggg.."] },
+  { id:"envelope", name:"红包", note:"内含 100 万 tokens", map:["rrrrrrrr","rRRRRRRr","gggggggg","rrrggrrr","rrgyygrr","rrrggrrr","rrrrrrrr","rrrrrrrr"] },
+  { id:"drum", name:"拨浪鼓", note:"咚咚，起床跑测试", map:["r......r",".g.rr.g.","..rrrr..","g.rwwr.g","..rrrr..","...bb...","...bb...","...bb..."] },
+  { id:"gpu", name:"显卡", note:"算力管够", map:["........","kkkkkkkk","kssksssk","kssksssk","kkkkkkkk",".g.g.g.g","........","........"] }
+];
+const GIFT_BY_ID = Object.fromEntries(GIFTS.map(g => [g.id, g]));
+GIFTS.forEach(g => SPRITES["gift-" + g.id] = g.map);
+
+function spriteHTML(name) {
+  if (name === "clawd") return clawdSVG();
+  if (name === "clawd-plain") return clawdSVG({ bow:false });
+  if (name === "clawd-guest") return clawdSVG({ bow:false, bib:false });
+  return SPRITES[name] ? pixelSVG(SPRITES[name]) : "";
+}
+$$("[data-sprite]").forEach(el => el.innerHTML = spriteHTML(el.dataset.sprite));
+
+/* Hero Clawd */
+$("#clawd-jump").innerHTML = clawdSVG();
+if (reduceMotion) $("#clawd-bob").classList.remove("bob");
+(function craters() {
+  const moon = $("#moon");
+  [[22,30,7],[62,22,5],[70,58,9],[30,66,6],[48,44,4],[80,40,4]].forEach(([x,y,s]) => {
+    const d = document.createElement("i");
+    d.className = "crater";
+    d.style.cssText = `left:${x}%;top:${y}%;width:${s}%;height:${s}%`;
+    moon.appendChild(d);
+  });
+})();
+
+/* ================= 星空 ================= */
+const sky = $("#sky"), sctx = sky.getContext("2d");
+let stars = [];
+function sizeCanvas(c) {
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  c.width = innerWidth * dpr; c.height = innerHeight * dpr;
+  c.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+function makeStars() {
+  sizeCanvas(sky);
+  const n = Math.round(innerWidth * innerHeight / 9000);
+  stars = Array.from({ length:n }, () => ({
+    x: Math.floor(Math.random() * innerWidth / 3) * 3,
+    y: Math.floor(Math.random() * innerHeight / 3) * 3,
+    s: Math.random() < .15 ? 3 : 2,
+    p: Math.random() * Math.PI * 2,
+    v: .4 + Math.random() * 1.4
+  }));
+}
+function drawSky(t) {
+  sctx.clearRect(0, 0, innerWidth, innerHeight);
+  for (const st of stars) {
+    const a = reduceMotion ? .7 : .35 + .65 * (0.5 + 0.5 * Math.sin(st.p + t / 1000 * st.v));
+    sctx.fillStyle = `rgba(245,233,196,${a.toFixed(2)})`;
+    sctx.fillRect(st.x, st.y, st.s, st.s);
+  }
+}
+let lastSky = 0;
+function skyLoop(t) {
+  if (t - lastSky > 90) { drawSky(t); lastSky = t; }
+  if (!reduceMotion) requestAnimationFrame(skyLoop);
+}
+makeStars(); drawSky(0); if (!reduceMotion) requestAnimationFrame(skyLoop);
+
+/* ================= 特效 ================= */
+const fx = $("#fx"), fctx = fx.getContext("2d");
+sizeCanvas(fx);
+addEventListener("resize", () => { makeStars(); drawSky(performance.now()); sizeCanvas(fx); });
+let particles = [], fxRunning = false;
+const FW_COLORS = ["#e8b94a","#ffd76a","#cf3a2c","#d97757","#f5e9c4","#f29b93"];
+function firework() {
+  const bursts = reduceMotion ? 1 : 3;
+  for (let b = 0; b < bursts; b++) {
+    setTimeout(() => {
+      const cx = innerWidth * (.15 + Math.random() * .7), cy = innerHeight * (.12 + Math.random() * .35);
+      const col = FW_COLORS[Math.floor(Math.random() * FW_COLORS.length)];
+      const n = reduceMotion ? 24 : 56;
+      for (let i = 0; i < n; i++) {
+        const a = (Math.PI * 2 * i) / n, sp = 2 + Math.random() * 3.2;
+        particles.push({ x:cx, y:cy, vx:Math.cos(a) * sp, vy:Math.sin(a) * sp, life:1, col: Math.random() < .25 ? "#fff3d6" : col });
+      }
+      startFx();
+    }, b * 260);
+  }
+}
+function startFx() { if (!fxRunning) { fxRunning = true; requestAnimationFrame(fxLoop); } }
+function fxLoop() {
+  fctx.clearRect(0, 0, innerWidth, innerHeight);
+  particles = particles.filter(p => p.life > 0);
+  for (const p of particles) {
+    p.x += p.vx; p.y += p.vy; p.vy += .05; p.vx *= .985; p.vy *= .985; p.life -= .012;
+    fctx.globalAlpha = Math.max(p.life, 0);
+    fctx.fillStyle = p.col;
+    fctx.fillRect(Math.round(p.x / 4) * 4, Math.round(p.y / 4) * 4, 4, 4);
+  }
+  fctx.globalAlpha = 1;
+  if (particles.length) requestAnimationFrame(fxLoop); else { fxRunning = false; fctx.clearRect(0, 0, innerWidth, innerHeight); }
+}
+function envelopeRain() {
+  const rain = $("#rain"), n = reduceMotion ? 6 : 18;
+  for (let i = 0; i < n; i++) {
+    const d = document.createElement("div");
+    d.className = "fall";
+    d.innerHTML = pixelSVG(GIFT_BY_ID.envelope.map);
+    d.style.left = (Math.random() * 96) + "%";
+    d.style.animationDuration = (2.4 + Math.random() * 2) + "s";
+    d.style.animationDelay = (Math.random() * .9) + "s";
+    d.style.setProperty("--rot", (Math.random() * 360 - 180).toFixed(0) + "deg");
+    d.addEventListener("animationend", () => d.remove());
+    rain.appendChild(d);
+  }
+}
+function toastWords() {
+  const words = ["干杯！","满月快乐！","干了！","福气满满"];
+  const n = reduceMotion ? 1 : 3;
+  for (let i = 0; i < n; i++) {
+    setTimeout(() => {
+      const w = document.createElement("div");
+      w.className = "toast-word";
+      w.textContent = words[Math.floor(Math.random() * words.length)];
+      w.style.left = (10 + Math.random() * 70) + "vw";
+      w.style.top = (25 + Math.random() * 45) + "vh";
+      w.addEventListener("animationend", () => w.remove());
+      document.body.appendChild(w);
+    }, i * 220);
+  }
+  cheerArms();
+}
+const BUBBLES = ["嘿嘿！","再摸一下～","谢谢你来！","好痒……","满月快乐！","我长大了一点点","钳子给你握握"];
+let bubbleIdx = 0;
+function patClawd() {
+  const j = $("#clawd-jump");
+  j.classList.remove("jump"); void j.offsetWidth; j.classList.add("jump");
+  $("#bubble").textContent = BUBBLES[bubbleIdx++ % BUBBLES.length];
+  const stage = $(".stage");
+  for (let i = 0; i < 3; i++) {
+    const h = document.createElement("div");
+    h.className = "heart";
+    h.innerHTML = pixelSVG(SPRITES.heart);
+    h.style.left = (32 + Math.random() * 36) + "%";
+    h.style.top = (38 + Math.random() * 10) + "%";
+    h.style.animationDelay = (i * .12) + "s";
+    h.addEventListener("animationend", () => h.remove());
+    stage.appendChild(h);
+  }
+}
+function cheerArms() {
+  const s = $("#clawd-jump");
+  s.classList.remove("cheering"); void s.offsetWidth; s.classList.add("cheering");
+  setTimeout(() => s.classList.remove("cheering"), 1900);
+}
+const CHEER_TEXT = { firework:"放了一束烟花", toast:"举杯喊了声干杯", pat:"摸了摸 Clawd 的头", envelope:"撒了一把红包" };
+function playCheer(kind) {
+  if (kind === "firework") { firework(); cheerArms(); }
+  else if (kind === "toast") toastWords();
+  else if (kind === "pat") patClawd();
+  else if (kind === "envelope") { envelopeRain(); cheerArms(); }
+}
+function hhmm(t) { const d = new Date(t); return String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0"); }
+function addFeed(who, kind) {
+  const ul = $("#feed"), li = document.createElement("li");
+  const tm = document.createElement("time"); tm.textContent = hhmm(Date.now());
+  const sp = document.createElement("span"); sp.textContent = `${who} ${CHEER_TEXT[kind]}`;
+  li.append(tm, sp); ul.prepend(li);
+  while (ul.children.length > 6) ul.lastElementChild.remove();
+}
+
+/* ================= 状态 ================= */
+const S = { db:null, room:null, user:null, uid:null, isOwner:false, guests:[], writable:true, loaded:false, myNick:"" };
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} }
+};
+S.myNick = (store.get("clawd-feast-nick") || "").slice(0, 16);
+const eggCount = () => parseInt(store.get("clawd-feast-eggs") || "0", 10) || 0;
+
+/* ================= 席间：按钮 & 在场 ================= */
+let lastCheer = 0;
+$$("[data-cheer]").forEach(btn => btn.addEventListener("click", () => {
+  const now = Date.now();
+  if (now - lastCheer < 700) return;
+  lastCheer = now;
+  const kind = btn.dataset.cheer;
+  playCheer(kind);
+  addFeed("你", kind);
+  if (S.room) {
+    S.room.emit("cheer", { kind }).catch(e => {
+      if (e && e.code === "not_permitted") {
+        const n = $("#cheer-note");
+        n.textContent = "你现在是观礼身份，这些动静只有你自己看得到。";
+        n.hidden = false;
+      }
+    });
+  }
+}));
+$("#hero-clawd").addEventListener("click", () => $('.cheer[data-cheer="pat"]').click());
+
+function setHere(n) {
+  $("#stat-here").textContent = n;
+  $("#here-count").textContent = n + " 位";
+}
+function renderPeers(peers) {
+  const box = $("#guests-now");
+  box.textContent = "";
+  const viewers = peers.filter(p => p.kind !== "agent");
+  const list = viewers.length ? viewers : [{ isMe:true, sameTab:true, presence:{ nick:S.myNick } }];
+  setHere(list.length);
+  list.slice(0, 30).forEach(p => {
+    const d = document.createElement("div");
+    d.className = "peer" + (p.isMe ? " me" : "");
+    d.innerHTML = clawdSVG({ bow:false, bib:false });
+    const pr = p.presence || {};
+    const col = typeof pr.c === "string" && /^(#[0-9a-fA-F]{3,8}|rgba?\([\d\s.,%]+\)|hsla?\([\d\s.,%deg]+\))$/.test(pr.c) ? pr.c : null;
+    if (col) d.firstElementChild.style.setProperty("--body", col);
+    const s = document.createElement("small");
+    const nick = typeof pr.nick === "string" && pr.nick.trim() ? pr.nick.trim().slice(0, 16) : "宾客";
+    s.textContent = p.isMe && p.sameTab ? (nick === "宾客" ? "你" : nick + "（你）") : nick;
+    d.appendChild(s);
+    box.appendChild(d);
+  });
+  if (viewers.length > 30) {
+    const more = document.createElement("div");
+    more.className = "note"; more.textContent = `还有 ${viewers.length - 30} 位`;
+    box.appendChild(more);
+  }
+}
+renderPeers([]);
+function nickOfPeer(peerId) {
+  if (!S.room) return "一位宾客";
+  const p = S.room.peers().find(x => x.peer === peerId);
+  const n = p && p.presence && typeof p.presence.nick === "string" ? p.presence.nick.trim().slice(0, 16) : "";
+  return n ? `「${n}」` : "一位宾客";
+}
+
+/* ================= 签到簿 ================= */
+const picker = $("#gift-picker");
+GIFTS.forEach((g, i) => {
+  const lab = document.createElement("label");
+  lab.className = "gift";
+  lab.innerHTML = `<input type="radio" name="gift" id="gift-${g.id}" value="${g.id}"${i === 0 ? " checked" : ""}>${pixelSVG(g.map)}<b>${g.name}</b><span>${g.note}</span>`;
+  picker.appendChild(lab);
+});
+const nickIn = $("#nick"), wishIn = $("#wish");
+if (S.myNick) nickIn.value = S.myNick;
+const updateCount = () => $("#wish-count").textContent = `${[...wishIn.value].length} / 80`;
+wishIn.addEventListener("input", updateCount);
+
+function setStatus(msg, kind = "") {
+  const s = $("#sign-status");
+  s.textContent = msg;
+  s.className = "status" + (kind ? " " + kind : "");
+}
+function setReadOnly(msg) {
+  S.writable = false;
+  $("#sign-btn").disabled = true;
+  setStatus(msg);
+}
+function clean(v, max) { return typeof v === "string" ? [...v.trim()].slice(0, max).join("") : ""; }
+function sanitizeGuest(id, d) {
+  d = d || {};
+  return {
+    id,
+    nick: clean(d.nick, 16) || "无名宾客",
+    wish: clean(d.wish, 80),
+    gift: GIFT_BY_ID[d.gift] ? d.gift : null,
+    at: typeof d.at === "number" ? d.at : 0
+  };
+}
+function fmtDate(t) {
+  if (!t) return "";
+  const d = new Date(t);
+  return `${d.getMonth() + 1}.${d.getDate()} ${hhmm(t)}`;
+}
+function renderLedger() {
+  const counts = Object.fromEntries(GIFTS.map(g => [g.id, 0]));
+  S.guests.forEach(g => { if (g.gift) counts[g.gift]++; });
+  const ul = $("#ledger-list");
+  ul.textContent = "";
+  let total = 0;
+  GIFTS.forEach(g => {
+    total += counts[g.id];
+    const li = document.createElement("li");
+    li.innerHTML = pixelSVG(g.map);
+    const name = document.createElement("span"); name.textContent = g.name;
+    const n = document.createElement("b"); n.textContent = "× " + counts[g.id];
+    li.append(name, n); ul.appendChild(li);
+  });
+  $("#ledger-total").textContent = total + " 份";
+  $("#stat-gifts").textContent = total;
+  $("#stat-signed").textContent = S.guests.length;
+}
+let pendingDelete = null;
+function renderWall() {
+  const wall = $("#wall");
+  wall.textContent = "";
+  const list = [...S.guests].sort((a, b) => b.at - a.at);
+  $("#wall-note").textContent = list.length ? `共 ${list.length} 页红纸` : "";
+  if (!list.length) {
+    const e = document.createElement("div");
+    e.className = "empty";
+    e.textContent = S.db ? "签到簿还空着。第一位签到的宾客，Clawd 会记一辈子。" : "签到簿要在 Claude 里打开才能翻看。你仍然可以放烟花、领红鸡蛋。";
+    wall.appendChild(e);
+  }
+  list.forEach(g => {
+    const card = document.createElement("article");
+    card.className = "wish";
+    const who = document.createElement("div"); who.className = "who"; who.textContent = g.nick;
+    const msg = document.createElement("div"); msg.className = "msg"; msg.textContent = g.wish || "（送上祝福，尽在不言中）";
+    const meta = document.createElement("div"); meta.className = "meta";
+    if (g.gift) {
+      meta.insertAdjacentHTML("beforeend", pixelSVG(GIFT_BY_ID[g.gift].map));
+      const gn = document.createElement("span"); gn.textContent = "送上" + GIFT_BY_ID[g.gift].name; meta.appendChild(gn);
+    }
+    const tm = document.createElement("time"); tm.textContent = fmtDate(g.at); meta.appendChild(tm);
+    card.append(who, msg, meta);
+    if (g.id === S.uid) {
+      const m = document.createElement("span"); m.className = "mine"; m.textContent = "我"; card.appendChild(m);
+    }
+    if (S.isOwner && S.db) {
+      const del = document.createElement("button");
+      del.type = "button"; del.className = "del";
+      del.textContent = pendingDelete === g.id ? "确定撤下这一页？" : "撤下";
+      del.addEventListener("click", async () => {
+        if (pendingDelete !== g.id) { pendingDelete = g.id; renderWall(); return; }
+        pendingDelete = null;
+        del.disabled = true;
+        try { await S.db.doc("guests/" + g.id).delete(); }
+        catch (e) { del.textContent = "没撤下来，稍后再试"; }
+      });
+      card.appendChild(del);
+    }
+    wall.appendChild(card);
+  });
+}
+function fillMine() {
+  const mine = S.guests.find(g => g.id === S.uid);
+  if (!mine) return;
+  if (!S.myNick) {
+    S.myNick = mine.nick;
+    if (S.room) S.room.presence({ nick: mine.nick }).catch(() => {});
+  }
+  if (!nickIn.value || document.activeElement !== nickIn) nickIn.value = mine.nick;
+  if (!wishIn.value && document.activeElement !== wishIn) wishIn.value = mine.wish;
+  if (mine.gift) { const r = $("#gift-" + mine.gift); if (r && !S.touchedGift) r.checked = true; }
+  updateCount();
+  $("#sign-btn").textContent = "更新我的祝福";
+}
+picker.addEventListener("change", () => S.touchedGift = true);
+
+$("#signform").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const nick = clean(nickIn.value, 16), wish = clean(wishIn.value, 80);
+  const gift = ($('input[name="gift"]:checked') || {}).value;
+  if (!nick) { setStatus("先写个昵称吧，Clawd 想知道你是谁。", "err"); nickIn.focus(); return; }
+  if (!wish) { setStatus("写一句祝福吧，一句就好。", "err"); wishIn.focus(); return; }
+  if (!S.db || !S.uid || !S.writable) { setStatus("现在还不能签到：需要在 Claude 里登录后打开这一页。", "err"); return; }
+  const btn = $("#sign-btn");
+  btn.disabled = true;
+  setStatus("正在落笔……");
+  const prev = S.guests.find(g => g.id === S.uid);
+  try {
+    await S.db.doc("guests/" + S.uid).set({ nick, wish, gift: GIFT_BY_ID[gift] ? gift : "egg", at: prev && prev.at ? prev.at : Date.now(), updatedAt: Date.now() });
+    S.myNick = nick; store.set("clawd-feast-nick", nick);
+    if (S.room) S.room.presence({ nick }).catch(() => {});
+    setStatus(prev ? "祝福已更新。" : "签到成功！Clawd 收到你的祝福了。", "ok");
+    btn.textContent = "更新我的祝福";
+    if (!prev) { firework(); cheerArms(); }
+    btn.disabled = false;
+  } catch (e) {
+    const code = e && e.code;
+    if (code === "invalid_argument") setReadOnly("你现在是观礼身份，暂时不能签到。可以请主人把你设成可参与的宾客。");
+    else if (code === "quota_exceeded") { setStatus("签到簿写满了，暂时签不进去。", "err"); btn.disabled = false; }
+    else { setStatus("没签上，网络好像不太稳，再点一次试试。", "err"); btn.disabled = false; }
+  }
+});
+
+/* ================= 菜单 ================= */
+const DISHES = [
+  ["红烧 Token 肉", "肥而不腻，按字计价，一口一个上下文。"],
+  ["清蒸百万窗口鱼", "整条上桌，一个字都不丢，原汁原味。"],
+  ["宫保 Prompt 丁", "微辣。提示词写得越具体，越下饭。"],
+  ["糖醋 Bug 排骨", "酸酸甜甜，一口啃下去，bug 就修好了。"],
+  ["八宝补丁饭", "八个 patch 一锅蒸，合进主干不冲突。"],
+  ["酒酿缓存圆子", "热过一次就秒上桌，第二碗更快。"],
+  ["一根到底长寿面", "一根面条吃到尾，绝不截断。"],
+  ["满月红鸡蛋", "老规矩压轴，圆圆满满，人人有份。"]
+];
+const mg = $("#menu-grid");
+DISHES.forEach(([n, d], i) => {
+  const el = document.createElement("div");
+  el.className = "dish";
+  el.innerHTML = `<span class="no">第 ${i + 1} 道</span><h3></h3><p></p>`;
+  el.querySelector("h3").textContent = n;
+  el.querySelector("p").textContent = d;
+  mg.appendChild(el);
+});
+
+/* ================= 回礼：红鸡蛋 ================= */
+const EGG = ["....rrrr....","...rrrrrr...","..rrwrrrrr..",".rrwrrrrrrr.",".rrrrrrrrrr.","rrrrrrrrrrrr","rrrrrrrrrrrr","rrrrrrrrrrrR","rrrrrrrrrrRR",".rrrrrrrrRR.",".RrrrrrrRRR.","..RRRRRRRR..","....RRRR...."];
+const EGG_CRACKED = ["............","...r....r...","..rrw..rrr..",".rrw.rr.rrr.","............","....yyyy....","...yyyyyy...","rrryyyyyyrrr","rrrrrrrrrrRR",".rrrrrrrrRR.",".RrrrrrrRRR.","..RRRRRRRR..","....RRRR...."];
+const FORTUNES = [
+  "愿你的代码一次编译通过。","愿你的测试全部变绿。","愿每个 bug 都在上线前现身。","愿你的 PR 秒过 review。",
+  "愿你的周末不被半夜的告警吵醒。","愿你的上下文永远够用。","愿你 git push 从不冲突。","愿你收到的需求都清清楚楚。",
+  "愿你的咖啡一直是热的。","愿你的 TODO 都有人做完。","愿你今天被温柔对待。","愿你想做的事，都有人帮你一起做。"
+];
+const eggBtn = $("#egg-btn");
+eggBtn.innerHTML = pixelSVG(EGG);
+function showEggCount() {
+  const n = eggCount();
+  $("#egg-count").textContent = n ? `你已经领了 ${n} 个红鸡蛋` : "";
+}
+showEggCount();
+let lastFortune = -1, cracking = false;
+function crackEgg() {
+  if (cracking) return;
+  cracking = true;
+  eggBtn.innerHTML = pixelSVG(EGG);
+  eggBtn.classList.remove("shake"); void eggBtn.offsetWidth; eggBtn.classList.add("shake");
+  setTimeout(() => {
+    eggBtn.innerHTML = pixelSVG(EGG_CRACKED);
+    let i; do { i = Math.floor(Math.random() * FORTUNES.length); } while (i === lastFortune && FORTUNES.length > 1);
+    lastFortune = i;
+    $("#fortune").textContent = FORTUNES[i];
+    store.set("clawd-feast-eggs", String(eggCount() + 1));
+    showEggCount();
+    $("#egg-again").textContent = "再敲一个";
+    cracking = false;
+  }, reduceMotion ? 50 : 520);
+}
+eggBtn.addEventListener("click", crackEgg);
+$("#egg-again").addEventListener("click", crackEgg);
+
+/* ================= 连接共享能力 ================= */
+renderLedger();
+const C = window.claude;
+const use = name => (C && typeof C.use === "function") ? C.use(name).catch(() => null) : Promise.resolve(null);
+
+(async () => {
+  const [user, db, room] = await Promise.all([use("user"), use("db"), use("room")]);
+  S.user = user; S.db = db; S.room = room;
+
+  if (user) {
+    try {
+      S.uid = await user.id();
+      S.isOwner = !!(await user.isOwner());
+    } catch {}
+  }
+
+  /* 签到簿 */
+  if (!db) {
+    setReadOnly("签到簿要在 Claude 里登录后打开才能使用。烟花和红鸡蛋随便玩。");
+    renderWall();
+  } else {
+    if (!S.uid) setReadOnly("需要登录后才能签到。你仍然可以翻看签到簿。");
+    else setStatus("写好之后点“落座签到”。");
+    const timer = setTimeout(() => {
+      if (!S.loaded) $("#wall-note").textContent = "签到簿还没连上，可能网络有点慢。";
+    }, 10000);
+    db.collection("guests").onSnapshot(snap => {
+      if (!snap.metadata.fromCache) { clearTimeout(timer); S.loaded = true; $("#wall-note").textContent = ""; }
+      S.guests = snap.docs.filter(d => d.exists).map(d => sanitizeGuest(d.id, d.data()));
+      renderLedger(); renderWall(); fillMine();
+    }, err => {
+      clearTimeout(timer);
+      $("#wall-note").textContent = "签到簿暂时打不开。";
+      if (err && err.code === "revoked") setReadOnly("签到簿暂时不可用。");
+    });
+  }
+
+  /* 在场 & 实时动静 */
+  if (room) {
+    let color = null;
+    try { if (user) color = (await user.me()).color; } catch {}
+    const t = Date.now();
+    const pres = { nick: S.myNick || "" };
+    if (color) { pres.c = color; pres.who = { c: color, t }; }
+    room.presence(pres).catch(() => {});
+    room.onPeers(ch => renderPeers(ch.peers), () => {});
+    room.on("cheer", msg => {
+      if (msg.sameTab) return;
+      const kind = msg.data && msg.data.kind;
+      if (!CHEER_TEXT[kind]) return;
+      playCheer(kind);
+      addFeed(msg.isMe ? "你（另一个窗口）" : nickOfPeer(msg.peer), kind);
+    }, () => {});
+  }
+})();
+})();
+</script>
+
+</body>
+</html>
