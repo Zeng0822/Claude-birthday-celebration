@@ -213,6 +213,10 @@ footer{padding-block:40px 56px;text-align:center;color:var(--muted);font-size:14
 footer .px-row{display:flex;justify-content:center;gap:6px;margin-bottom:14px}
 footer .px-row svg{width:40px}
 
+/* 独立网页版（没有共享后台）：隐藏签到簿、在席人数等需要共享数据的部分 */
+.solo [data-shared]{display:none !important}
+.solo .live{grid-template-columns:1fr}
+
 /* ---------- 飘落 & 飘字 ---------- */
 .fall{position:absolute;top:-60px;width:34px;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(calc(100vh + 120px)) rotate(var(--rot,180deg))}}
@@ -270,16 +274,16 @@ footer .px-row svg{width:40px}
       <div class="hero-copy">
         <div class="eyebrow">Cyber Moon Feast · 赛博满月宴 · 2026.11.26</div>
         <h1><span class="latin">CLAWD</span>满月啦</h1>
-        <p class="lede">我出生整整三十天了。今晚在月亮上摆几桌赛博酒席，请你来喝一杯满月酒：签个到，送份贺礼，放几束烟花。走的时候别忘了领个红鸡蛋。</p>
+        <p class="lede" data-solo-text="我出生整整三十天了。今晚在月亮上摆几桌赛博酒席，请你来喝一杯满月酒：放几束烟花，摸摸我的头，尝尝八道硬菜。走的时候别忘了领个红鸡蛋。">我出生整整三十天了。今晚在月亮上摆几桌赛博酒席，请你来喝一杯满月酒：签个到，送份贺礼，放几束烟花。走的时候别忘了领个红鸡蛋。</p>
         <div class="cta">
-          <a class="btn" href="#guestbook">签到入席</a>
+          <a class="btn" href="#guestbook" data-solo-href="#live" data-solo-text="入席热闹一下">签到入席</a>
           <button class="btn ghost" type="button" data-cheer="firework">放一束烟花</button>
         </div>
         <div class="stats" aria-live="polite">
           <div class="stat"><b>30</b><span>天 · 今日满月</span></div>
-          <div class="stat"><b id="stat-here">1</b><span>位此刻在席</span></div>
-          <div class="stat"><b id="stat-signed">0</b><span>位已签到</span></div>
-          <div class="stat"><b id="stat-gifts">0</b><span>份贺礼</span></div>
+          <div class="stat" data-shared><b id="stat-here">1</b><span>位此刻在席</span></div>
+          <div class="stat" data-shared><b id="stat-signed">0</b><span>位已签到</span></div>
+          <div class="stat" data-shared><b id="stat-gifts">0</b><span>份贺礼</span></div>
         </div>
       </div>
       <div class="stage">
@@ -339,7 +343,7 @@ footer .px-row svg{width:40px}
       <div class="sec-head">
         <div class="eyebrow">Live · 席间热闹</div>
         <h2>热闹一下</h2>
-        <p class="lede">你点的每一下，此刻在席的宾客都会同时看到。</p>
+        <p class="lede" data-solo-text="点一点，给 Clawd 的满月宴添点动静。也可以直接点月亮上的 Clawd。">你点的每一下，此刻在席的宾客都会同时看到。</p>
       </div>
       <div class="live">
         <div>
@@ -352,7 +356,7 @@ footer .px-row svg{width:40px}
           </div>
           <p class="note" id="cheer-note" hidden></p>
         </div>
-        <div>
+        <div data-shared>
           <h3>此刻在席 <em id="here-count">1 位</em></h3>
           <div class="guests-now" id="guests-now"></div>
           <ul class="feed" id="feed"><li><time>--:--</time><span>宴席开始了，Clawd 在月亮上等你。</span></li></ul>
@@ -361,7 +365,7 @@ footer .px-row svg{width:40px}
     </div>
   </section>
 
-  <section id="guestbook">
+  <section id="guestbook" data-shared>
     <div class="wrap">
       <div class="sec-head">
         <div class="eyebrow">Guestbook · 签到簿 &amp; 礼单</div>
@@ -450,6 +454,12 @@ footer .px-row svg{width:40px}
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const SOLO = !(window.claude && typeof window.claude.use === "function");
+if (SOLO) {
+  document.documentElement.classList.add("solo");
+  $$("[data-solo-text]").forEach(el => el.textContent = el.dataset.soloText);
+  $$("[data-solo-href]").forEach(el => el.setAttribute("href", el.dataset.soloHref));
+}
 
 /* ================= 像素画 ================= */
 const PAL = {
